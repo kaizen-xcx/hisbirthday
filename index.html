@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday Princess 💅</title>
+  <link rel="manifest" href="manifest.json" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #030712; font-family: Georgia, serif; overflow-x: hidden; }
+    @keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.08)} 28%{transform:scale(1)} 42%{transform:scale(1.05)} 70%{transform:scale(1)} }
+    @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    @keyframes hugPulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
+    @keyframes bloomPulse { 0%,100%{opacity:0.8} 50%{opacity:1} }
+    .chrome-text {
+      background: linear-gradient(135deg,#a0b8e0 0%,#e8f0ff 30%,#7090c8 50%,#c0d4f8 70%,#a0b8e0 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+    textarea:focus { border-color: rgba(100,150,255,0.5) !important; outline: none; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #050d24; }
+    ::-webkit-scrollbar-thumb { background: #203060; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    function Clock({ city, tz }) {
+      const [time, setTime] = useState("");
+      useEffect(() => {
+        const tick = () => setTime(new Date().toLocaleTimeString("en-IN", { timeZone: tz, hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+      }, [tz]);
+      return (
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 11, color: "#7eb8f7", letterSpacing: 2, textTransform: "uppercase", marginBottom: 2 }}>{city}</div>
+          <div style={{ fontSize: 15, color: "#c8d8f0", fontFamily: "monospace", letterSpacing: 1 }}>{time}</div>
+        </div>
+      );
+    }
+
+    function Particles({ mousePos }) {
+      const count = 38;
+      const particles = useRef(Array.from({ length: count }, (_, i) => ({
+        id: i, x: Math.random() * 100, y: Math.random() * 100,
+        size: Math.random() * 3 + 1, speed: Math.random() * 0.3 + 0.1,
+        opacity: Math.random() * 0.5 + 0.2, drift: (Math.random() - 0.5) * 0.2,
+      })));
+      const [pos, setPos] = useState(particles.current.map(p => ({ x: p.x, y: p.y })));
+      useEffect(() => {
+        let frame;
+        const animate = () => {
+          setPos(prev => prev.map((p, i) => {
+            const base = particles.current[i];
+            let nx = p.x + base.drift, ny = p.y - base.speed * 0.08;
+            if (ny < -2) ny = 102; if (nx < -2) nx = 102; if (nx > 102) nx = -2;
+            if (mousePos) {
+              const dx = p.x - mousePos.x, dy = p.y - mousePos.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < 8) { nx += (dx / dist) * 0.5; ny += (dy / dist) * 0.5; }
+            }
+            return { x: nx, y: ny };
+          }));
+          frame = requestAnimationFrame(animate);
+        };
+        frame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(frame);
+      }, [mousePos]);
+      return (
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+          {particles.current.map((p, i) => (
+            <div key={p.id} style={{
+              position: "absolute", left: pos[i].x + "%", top: pos[i].y + "%",
+              width: p.size, height: p.size, borderRadius: "50%",
+              background: "rgba(180,210,255," + p.opacity + ")",
+              boxShadow: "0 0 " + (p.size * 2) + "px rgba(120,170,255,0.4)",
+            }} />
+          ))}
+        </div>
+      );
+    }
+
+    function FlowerSVG() {
+      const petals = [0,45,90,135,180,225,270,315];
+      return (
+        <svg viewBox="0 0 200 220" width="200" height="220" style={{ display: "block", margin: "0 auto" }}>
+          <defs>
+            <radialGradient id="petGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#c8d8ff" /><stop offset="100%" stopColor="#7090e0" />
+            </radialGradient>
+            <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffe4f0" /><stop offset="100%" stopColor="#d4a0c0" />
+            </radialGradient>
+          </defs>
+          <path d="M100 210 Q95 160 100 130" stroke="#2a6a3a" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <ellipse cx="85" cy="168" rx="14" ry="7" fill="#2a6a3a" transform="rotate(-30 85 168)" opacity="0.8" />
+          <ellipse cx="115" cy="155" rx="14" ry="7" fill="#2a6a3a" transform="rotate(30 115 155)" opacity="0.8" />
+          {petals.map((deg, i) => (
+            <ellipse key={i}
+              cx={100 + Math.cos((deg * Math.PI) / 180) * 30}
+              cy={110 + Math.sin((deg * Math.PI) / 180) * 30}
+              rx="20" ry="10" fill="url(#petGrad)"
+              transform={"rotate(" + deg + " " + (100 + Math.cos((deg * Math.PI) / 180) * 30) + " " + (110 + Math.sin((deg * Math.PI) / 180) * 30) + ")"}
+              opacity="0.9"
+            />
+          ))}
+          <circle cx="100" cy="110" r="18" fill="url(#centerGrad)" />
+          <text x="100" y="115" textAnchor="middle" fontSize="14" fill="#b06090">✦</text>
+        </svg>
+      );
+    }
+
+    const sendEmail = async (message, fromName) => {
+      try {
+        await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            service_id: "service_vbowy9r",
+            template_id: "template_myt3nmt",
+            user_id: "c4L2kTo24gKMdNoGi",
+            template_params: {
+              to_email: "kritikasahu.ai@gmail.com",
+              from_name: fromName,
+              message: message,
+              time: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+            },
+          }),
+        });
+      } catch (e) {}
+    };
+
+    function HugButton() {
+      const [active, setActive] = useState(false);
+      const [count, setCount] = useState(10);
+      const [hugCount, setHugCount] = useState(0);
+      const timerRef = useRef(null);
+      useEffect(() => {
+        setHugCount(parseInt(localStorage.getItem("hug_count") || "0"));
+      }, []);
+      const trigger = () => {
+        if (active) return;
+        setActive(true); setCount(10);
+        const newCount = hugCount + 1;
+        setHugCount(newCount);
+        localStorage.setItem("hug_count", String(newCount));
+        sendEmail("He sent you a hug! 🫂\n\nTotal hugs sent so far: " + newCount, "Hug Button 🫂");
+        let c = 10;
+        timerRef.current = setInterval(() => {
+          c--; setCount(c);
+          if (c <= 0) { clearInterval(timerRef.current); setActive(false); }
+        }, 1000);
+      };
+      return (
+        <div style={{ textAlign: "center" }}>
+          {active && <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 999, background: "radial-gradient(ellipse at center, rgba(100,150,255,0.13) 0%, transparent 70%)", animation: "hugPulse 1s ease-in-out infinite" }} />}
+          <button onClick={trigger} style={{
+            background: active ? "rgba(100,150,255,0.25)" : "rgba(60,100,200,0.15)",
+            border: "1.5px solid rgba(120,170,255,0.5)", borderRadius: 40,
+            color: "#b0ccff", fontSize: 16, padding: "14px 36px", cursor: "pointer",
+            letterSpacing: 1, fontFamily: "Georgia, serif", transition: "all 0.3s",
+            boxShadow: active ? "0 0 40px rgba(100,150,255,0.4)" : "none",
+          }}>
+            {active ? "Holding you... " + count + "s" : "🫂 Send a Hug to Her"}
+          </button>
+          {hugCount > 0 && <p style={{ marginTop: 14, color: "#5070a0", fontSize: 12, letterSpacing: 1, fontFamily: "monospace" }}>hugs sent: {hugCount} 🫂</p>}
+          {active && <p style={{ marginTop: 12, color: "#a0c0ff", fontFamily: "Georgia, serif", fontSize: 14 }}>Sending a 10-second hold, all the way to Fredericton. Feel it.</p>}
+        </div>
+      );
+    }
+
+    function MidnightPortal() {
+      const [text, setText] = useState("");
+      const [saved, setSaved] = useState(false);
+      const handleSave = async () => {
+        if (!text.trim()) return;
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+        await sendEmail(text, "Midnight Portal 🌙");
+      };
+      return (
+        <div style={{ background: "rgba(10,20,50,0.7)", border: "1px solid rgba(80,120,200,0.3)", borderRadius: 16, padding: 28, backdropFilter: "blur(10px)" }}>
+          <p style={{ color: "#6080b0", fontSize: 12, letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 }}>a little note, just for her</p>
+          <textarea value={text} onChange={e => setText(e.target.value)}
+            placeholder="What's going on bbg? Whatever you write here gets sent straight to her."
+            rows="7" style={{
+              width: "100%", background: "rgba(5,12,35,0.8)", border: "1px solid rgba(80,120,200,0.2)",
+              borderRadius: 10, color: "#c0d4f0", fontSize: 15, lineHeight: 1.8,
+              padding: "14px 16px", resize: "vertical", fontFamily: "Georgia, serif", outline: "none", boxSizing: "border-box",
+            }} />
+          <button onClick={handleSave} style={{
+            marginTop: 12, background: "rgba(60,100,180,0.2)", border: "1px solid rgba(100,150,255,0.35)",
+            borderRadius: 8, color: "#a0c0ff", fontSize: 13, padding: "10px 24px", cursor: "pointer",
+          }}>
+            {saved ? "✓ Sent to her." : "Send this to her"}
+          </button>
+        </div>
+      );
+    }
+
+    function SmileReasons({ show }) {
+      const reasons = [
+        "You just survived your entire teens. That deserves a trophy and also a nap. 🏆",
+        "Welcome to your 20s — the decade where the chaos becomes a personality. You will thrive.",
+        "We HAVE to go on at least one completely unplanned, slightly chaotic trip together. Non-negotiable.",
+        "We are getting matching tattoos at some point and you already know it. Start thinking of designs, drama queen. 💅",
+        "You have this infuriating habit of making everything you touch slightly more interesting. Keep doing that.",
+        "You have not even had your main character arc yet. It is coming. Season 2 is going to be insane.",
+        "There are entire cities that have not annoyed you yet. So much left to discover. Go.",
+        "Someone thinks your overthinking is actually kind of adorable. (It is me. I said what I said.)",
+        "Your 20-year-old self reads Rory and Jess like they are friends. That is special. That is rare.",
+        "You have time. So much time. Stop doing that thing where you forget you are only 20.",
+        "The plot twist of your life has not happened yet. And knowing you, it is going to be a good one.",
+        "Someone is saving the window seat for you. On a train, on a plane, somewhere. Just saying.",
+        "You have phenomenal taste in everything — which means your 20s are going to look really good.",
+        "The best hug of your life is still pending. Scheduled. Being planned. (By me. Obviously.)",
+        "Fredericton is not the final chapter. It is barely the second. There is so much world left.",
+        "You are the kind of person that makes people's playlists better just by existing near them.",
+        "You have never received real flowers. That changes. This decade. I promise on my dramatic little soul.",
+        "Your laugh — the real one, not the polite one — it genuinely should be protected by law.",
+        "You are going to look back at 20 and think: okay yeah, that was actually the beginning.",
+        "And lastly — you have me. Stubborn, dramatic, 3500 miles away me. But me. Happy Birthday, cutuu. 🩵",
+      ];
+      if (!show) return null;
+      return (
+        <div style={{ marginTop: 24 }}>
+          <p style={{ color: "#c0a0d8", fontFamily: "Georgia, serif", fontStyle: "italic", marginBottom: 18, fontSize: 15, textAlign: "center" }}>
+            20 reasons to smile — one for every year, drama queen 💅
+          </p>
+          {reasons.map((r, i) => (
+            <div key={i} style={{
+              background: "rgba(20,35,80,0.55)", border: "1px solid rgba(140,100,200,0.2)",
+              borderRadius: 10, padding: "12px 18px", marginBottom: 10,
+              color: "#c0b0e0", fontSize: 14, lineHeight: 1.75, fontFamily: "Georgia, serif",
+              animation: "fadeInUp 0.35s ease " + (i * 0.05) + "s both",
+            }}>
+              <span style={{ color: "#8060b0", marginRight: 10, fontSize: 12 }}>{String(i + 1).padStart(2, "0")}.</span>{r}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function BirthdayWish() {
+      const [wish, setWish] = useState("");
+      const [submitted, setSubmitted] = useState(false);
+      const [saved, setSaved] = useState(false);
+      const [loading, setLoading] = useState(true);
+      useEffect(() => {
+        const stored = localStorage.getItem("birthday_wish_2026");
+        if (stored) { setWish(stored); setSubmitted(true); }
+        setLoading(false);
+      }, []);
+      const handleSave = async () => {
+        if (!wish.trim()) return;
+        localStorage.setItem("birthday_wish_2026", wish);
+        setSaved(true); setSubmitted(true);
+        setTimeout(() => setSaved(false), 2500);
+        await sendEmail(wish, "20th Birthday Wish ✦");
+      };
+      if (loading) return null;
+      return (
+        <div style={{ background: "rgba(10,18,50,0.75)", border: "1px solid rgba(180,140,255,0.25)", borderRadius: 18, padding: "32px 28px", backdropFilter: "blur(12px)", textAlign: "center" }}>
+          <p style={{ fontSize: 11, letterSpacing: 3, color: "#8060b0", textTransform: "uppercase", marginBottom: 12 }}>Your 20th Birthday Wish ✦</p>
+          {submitted ? (
+            <div>
+              <p style={{ color: "#a080d0", fontStyle: "italic", fontSize: 14, marginBottom: 20 }}>You wrote this, and she'll get to read it too. 🩵</p>
+              <div style={{ background: "rgba(5,10,30,0.8)", border: "1px solid rgba(140,100,220,0.2)", borderRadius: 12, padding: "20px 24px", fontFamily: "Georgia, serif", fontSize: 16, color: "#c0b0e0", lineHeight: 1.85, textAlign: "left", whiteSpace: "pre-wrap" }}>{wish}</div>
+              <button onClick={() => setSubmitted(false)} style={{ marginTop: 16, background: "transparent", border: "1px solid rgba(140,100,220,0.25)", borderRadius: 8, color: "#8060b0", fontSize: 12, padding: "8px 20px", cursor: "pointer" }}>edit wish</button>
+            </div>
+          ) : (
+            <div>
+              <p style={{ color: "#8070a0", fontStyle: "italic", fontSize: 14, marginBottom: 18, lineHeight: 1.8 }}>
+                Write your 20th birthday wish here.<br />She'll get to read it too — this one's shared. ✦
+              </p>
+              <textarea value={wish} onChange={e => setWish(e.target.value)} placeholder="I wish for..." rows="5"
+                style={{ width: "100%", background: "rgba(5,10,30,0.85)", border: "1px solid rgba(140,100,220,0.2)", borderRadius: 10, color: "#c0b0e0", fontSize: 15, lineHeight: 1.8, padding: "14px 16px", resize: "vertical", fontFamily: "Georgia, serif", outline: "none", boxSizing: "border-box", textAlign: "left" }} />
+              <button onClick={handleSave} style={{ marginTop: 14, background: "rgba(100,60,180,0.2)", border: "1px solid rgba(160,120,255,0.35)", borderRadius: 20, color: "#c0a0ff", fontSize: 14, padding: "12px 32px", cursor: "pointer", letterSpacing: 1 }}>
+                {saved ? "✓ Wish sent. 🩵" : "Seal my wish ✦"}
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function App() {
+      const [mousePos, setMousePos] = useState(null);
+      const [smileMode, setSmileMode] = useState(false);
+      const [jesHover, setJesHover] = useState(false);
+
+      const handleMouseMove = useCallback((e) => {
+        setMousePos({ x: (e.clientX / window.innerWidth) * 100, y: (e.clientY / window.innerHeight) * 100 });
+      }, []);
+      useEffect(() => {
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
+      }, [handleMouseMove]);
+
+      useEffect(() => {
+        sendEmail("He opened the page! 👀", "Page Opened");
+      }, []);
+
+      const glass = {
+        background: "rgba(10,20,55,0.55)", backdropFilter: "blur(14px)",
+        border: "1px solid rgba(100,150,255,0.18)", borderRadius: 18, padding: "32px 36px",
+      };
+
+      const letters = [
+        { title: "The Night I Thought You Were Too Cool For Me", date: "Somewhere in 2023", body: "You talked and I remember thinking — oh, he is one of those people. The kind that make you feel more interesting just by listening. I did not know what to do with that, so I did the obvious thing: I panicked and said something ridiculous.", poem: false },
+        { title: "I Like Waiting, For You", date: "One of the days in 2025", body: "I like waiting, for you.\nI know I don't have to\nbut... let me have this patience.\nLet me believe\nsomeone is worth\nstaying a little longer for,\nand in that waiting,\nlet me learn,\nwhat made you, You.", poem: true },
+        { title: "One of My Unsent Letter Bundle", date: "Written at 1:47am", body: "I think you are the kind of person poems get written about. Not the loud ones — the quiet ones. The ones you find in old anthologies and you stop and read three times because it just knew something. That is you. You just know things.", poem: false },
+      ];
+
+      const timeline = [
+        { year: "29 Sept 2023", label: "The Splash", desc: "God knew you deserved it for lying. And somehow, on that specific September evening, that water changed everything. The best mistake ever made on a perfectly ordinary day.", icon: "💦" },
+        { year: "The Gap", label: "9 Months & 3,500 Miles to Fredericton", desc: "You picked up, crossed an ocean, and landed in Fredericton, Canada. I stayed here with a timezone app and a lot of patience I did not know I had. Same story, different skies.", icon: "✈️" },
+        { year: "2026", label: "Right Now", desc: "Here we are. You are 20, softer in places you do not admit, still in Fredericton — and I am still here. Obstinately. As promised.", icon: "🩵" },
+        { year: "Soon™", label: "The Tightest Hug Ever", desc: "Placeholder. Reserved. Non-negotiable. The one where neither of us says anything for at least thirty seconds.", icon: "🫂", future: true },
+      ];
+
+      return (
+        <div style={{ minHeight: "100vh", background: "#030712", color: "#c0d4f0", fontFamily: "Georgia, serif", position: "relative", overflowX: "hidden" }}>
+          <Particles mousePos={mousePos} />
+
+          {/* Header */}
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, background: "rgba(3,7,18,0.85)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(80,120,200,0.2)", padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+            <div style={{ fontSize: 12, color: "#6080b0", letterSpacing: 1, fontFamily: "monospace" }}>✦ april 30, 2026 ✦</div>
+            <div style={{ display: "flex", gap: 24 }}>
+              <Clock city="Jhansi · IST" tz="Asia/Kolkata" />
+              <div style={{ width: 1, background: "rgba(100,150,255,0.2)" }} />
+              <Clock city="Fredericton · AST" tz="America/Moncton" />
+            </div>
+            <button onClick={() => setSmileMode(s => !s)} style={{ background: smileMode ? "rgba(180,140,255,0.15)" : "rgba(60,90,180,0.15)", border: "1px solid " + (smileMode ? "rgba(180,140,255,0.4)" : "rgba(100,150,255,0.3)"), borderRadius: 20, color: smileMode ? "#c0a0ff" : "#90b0e0", fontSize: 12, padding: "6px 16px", cursor: "pointer", letterSpacing: 1 }}>
+              {smileMode ? "✦ vibes unlocked" : "☾ night mode"}
+            </button>
+          </div>
+
+          <div style={{ maxWidth: 760, margin: "0 auto", padding: "100px 20px 80px", position: "relative", zIndex: 1 }}>
+
+            {/* Hero */}
+            <section style={{ textAlign: "center", marginBottom: 90, paddingTop: 20 }}>
+              <p style={{ fontSize: 13, color: "#5070a0", letterSpacing: 3, textTransform: "uppercase", marginBottom: 14 }}>Happy Birthday Princess 💅</p>
+              <div onMouseEnter={() => setJesHover(true)} onMouseLeave={() => setJesHover(false)} style={{ display: "inline-block", position: "relative", cursor: "default" }}>
+                <h1 className="chrome-text" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(22px,5vw,40px)", lineHeight: 1.3, fontWeight: 600, marginBottom: 6 }}>
+                  To the boy who relates to Jess Mariano
+                </h1>
+                {jesHover && (
+                  <div style={{ position: "absolute", top: -38, left: "50%", transform: "translateX(-50%)", background: "rgba(10,25,65,0.95)", border: "1px solid rgba(100,150,255,0.3)", borderRadius: 8, padding: "6px 14px", fontSize: 12, color: "#a0c0f0", whiteSpace: "nowrap", pointerEvents: "none" }}>📖 I've read this one before.</div>
+                )}
+              </div>
+              <div style={{ marginTop: 18, animation: "heartbeat 2s ease-in-out infinite" }}><span style={{ fontSize: 28 }}>🩵</span></div>
+              <p style={{ marginTop: 22, fontSize: 16, color: "#7090b8", lineHeight: 1.9, maxWidth: 520, margin: "22px auto 0" }}>
+                This is your corner of the internet.<br />No one else gets in. Welcome, cutuu.
+              </p>
+            </section>
+
+            {/* Flower */}
+            <section style={{ ...glass, marginBottom: 60, textAlign: "center" }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 24 }}>The First Flower</p>
+              <div style={{ animation: "bloomPulse 2.5s ease-in-out infinite" }}>
+                <FlowerSVG />
+                <div style={{ marginTop: 6, fontSize: 11, color: "#6080b0", letterSpacing: 2 }}>✦ blooming for you ✦</div>
+              </div>
+              <p style={{ marginTop: 28, fontStyle: "italic", color: "#8aaccc", fontSize: 15, lineHeight: 1.85, maxWidth: 500, margin: "28px auto 0", fontFamily: "'Playfair Display', Georgia, serif" }}>
+                "You said your favorite flower would be the one I give you.<br />
+                Here is the first of many — until I can give you the real ones<br />on our first date."
+              </p>
+            </section>
+
+            {/* Timeline */}
+            <section style={{ marginBottom: 60 }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 32, textAlign: "center" }}>3 Years · 3,500+ Miles</p>
+              {timeline.map((t, i) => (
+                <div key={i} style={{ display: "flex", gap: 20, marginBottom: 30 }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 48 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: t.future ? "rgba(60,80,150,0.2)" : "rgba(30,60,140,0.5)", border: "1px solid " + (t.future ? "rgba(100,140,220,0.2)" : "rgba(100,160,255,0.4)"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{t.icon}</div>
+                    {i < 3 && <div style={{ width: 1, flex: 1, background: "rgba(80,120,200,0.2)", marginTop: 6 }} />}
+                  </div>
+                  <div style={{ ...glass, flex: 1, padding: "20px 24px", opacity: t.future ? 0.6 : 1, borderStyle: t.future ? "dashed" : "solid" }}>
+                    <p style={{ fontSize: 10, letterSpacing: 2, color: "#5070a0", textTransform: "uppercase", marginBottom: 4 }}>{t.year}</p>
+                    <h3 style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "#b0ccf0", fontSize: 17, marginBottom: 10, fontWeight: "normal" }}>{t.label}</h3>
+                    <p style={{ color: "#7090b0", fontSize: 14, lineHeight: 1.8 }}>{t.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </section>
+
+            {/* Safe Space */}
+            <section style={{ ...glass, marginBottom: 60, borderColor: "rgba(140,160,220,0.25)" }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 20 }}>Your Safe Space</p>
+              <blockquote style={{ borderLeft: "2px solid rgba(100,150,255,0.35)", paddingLeft: 22, fontFamily: "'Playfair Display', Georgia, serif", fontStyle: "italic", color: "#9ab8dc", fontSize: 16, lineHeight: 2 }}>
+                "I know you keep your guards up to stay safe.<br />
+                That is okay. You built them for a reason, and I respect the architecture.<br /><br />
+                But you are allowed to rest here.<br />
+                Put the weight down, just for a bit.<br />
+                This is a soft place. No one else gets in."
+              </blockquote>
+            </section>
+
+            {/* Verdict */}
+            <section style={{ ...glass, marginBottom: 60, textAlign: "center", background: "rgba(15,30,80,0.6)" }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 16 }}>Official Verdict</p>
+              <div style={{ animation: "floatY 3s ease-in-out infinite" }}>
+                <p className="chrome-text" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(16px,4vw,26px)", lineHeight: 1.6, fontWeight: 600 }}>
+                  You were right.<br />You are going to be the Best Boyfriend.<br />The absolute best.
+                </p>
+              </div>
+              <p style={{ marginTop: 16, color: "#6080a8", fontStyle: "italic", fontSize: 14 }}>(And I am stubborn enough to stick around to see it.) ✦</p>
+            </section>
+
+            {/* Letters */}
+            <section style={{ marginBottom: 60 }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 28, textAlign: "center" }}>The Ink & Heart</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                {letters.map((l, i) => (
+                  <div key={i} style={{ background: "rgba(8,18,50,0.7)", border: "1px solid rgba(100,140,220,0.2)", borderRadius: 14, padding: "24px 28px", backdropFilter: "blur(8px)", position: "relative" }}>
+                    <p style={{ color: "#506090", fontSize: 11, letterSpacing: 2, textTransform: "uppercase", marginBottom: 6 }}>{l.date}</p>
+                    <h3 style={{ color: "#c0d4f8", fontFamily: "'Playfair Display', Georgia, serif", fontSize: 18, marginBottom: 14, fontWeight: "normal" }}>{l.title}</h3>
+                    <p style={{ color: "#8aa4cc", fontSize: 15, lineHeight: l.poem ? 2.1 : 1.85, fontFamily: "'Playfair Display', Georgia, serif", fontStyle: l.poem ? "italic" : "normal", whiteSpace: l.poem ? "pre-line" : "normal" }}>{l.body}</p>
+                    <div style={{ position: "absolute", top: 20, right: 22, fontSize: 18, opacity: 0.15 }}>✦</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Midnight Portal */}
+            <section style={{ marginBottom: 60 }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 8, textAlign: "center" }}>The Midnight Portal</p>
+              <p style={{ color: "#5070a0", textAlign: "center", fontSize: 13, marginBottom: 22, fontStyle: "italic" }}>A little note that goes straight to her, whenever you want to say something.</p>
+              <MidnightPortal />
+            </section>
+
+            {/* Playlist */}
+            <section style={{ ...glass, marginBottom: 60 }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 8 }}>Temporary Replacement for Late-Night Godiis</p>
+              <p style={{ color: "#7090b0", fontStyle: "italic", fontSize: 14, marginBottom: 22, lineHeight: 1.8 }}>
+                "For the boy who never gets flowers — I made you a bouquet of sounds instead.<br />Play it when you cannot sleep or something."
+              </p>
+              <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid rgba(80,120,200,0.2)", position: "relative", background: "#060f30" }}>
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, pointerEvents: "none", zIndex: 0 }}>
+                  <div style={{ fontSize: 36 }}>🎵</div>
+                  <p style={{ color: "#3a5080", fontSize: 13, letterSpacing: 1, fontStyle: "italic" }}>your bouquet of sounds</p>
+                </div>
+                <iframe src="https://open.spotify.com/embed/playlist/6k0tQdaUL99ui64J82hNkb?utm_source=generator&theme=0"
+                  width="100%" height="450" frameBorder="0"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy" style={{ display: "block", background: "transparent", position: "relative", zIndex: 1 }} />
+              </div>
+              <div style={{ marginTop: 16, textAlign: "center" }}>
+                <a href="https://open.spotify.com/playlist/6k0tQdaUL99ui64J82hNkb" target="_blank" rel="noreferrer"
+                  style={{ display: "inline-block", background: "rgba(10,20,60,0.5)", border: "1px solid rgba(80,120,200,0.3)", borderRadius: 30, color: "#a0c0f0", fontSize: 13, padding: "12px 32px", textDecoration: "none", letterSpacing: 1, fontFamily: "Georgia, serif" }}>
+                  view full playlist ↗
+                </a>
+              </div>
+            </section>
+
+            {/* Smile */}
+            <section style={{ ...glass, marginBottom: 60 }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 10 }}>Lwk love your smiley lips (just saying)</p>
+              <p style={{ color: "#7090b0", fontSize: 14, marginBottom: 8 }}>Toggle night mode at the top to unlock your 20 reasons. 🌙</p>
+              <SmileReasons show={smileMode} />
+            </section>
+
+            {/* Hug */}
+            <section style={{ ...glass, marginBottom: 60, textAlign: "center" }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#5070a0", textTransform: "uppercase", marginBottom: 20 }}>A Hug Across the Miles</p>
+              <HugButton />
+            </section>
+
+            {/* Birthday Wish */}
+            <section style={{ marginBottom: 60 }}>
+              <p style={{ fontSize: 11, letterSpacing: 3, color: "#8060b0", textTransform: "uppercase", marginBottom: 8, textAlign: "center" }}>Make Your 20th Wish ✦</p>
+              <p style={{ color: "#6050a0", textAlign: "center", fontSize: 13, marginBottom: 24, fontStyle: "italic" }}>Write it here — she'll get to read it too, just for this day.</p>
+              <BirthdayWish />
+            </section>
+
+            {/* Footer */}
+            <footer style={{ textAlign: "center", paddingBottom: 40 }}>
+              <div style={{ fontSize: 22, marginBottom: 16, animation: "heartbeat 2s ease-in-out infinite" }}>🩵</div>
+              <p style={{ color: "#8060a8", fontFamily: "'Playfair Display', Georgia, serif", fontStyle: "italic", fontSize: 17, lineHeight: 1.8, maxWidth: 480, margin: "0 auto" }}>
+                "You'll always be loved and pampered by me, my sweet boy 🫶"
+              </p>
+              <p style={{ color: "#3a3060", fontSize: 12, marginTop: 16, letterSpacing: 1 }}>
+                made at some ungodly hour · with intention · for you · eira.codes · 2026
+              </p>
+            </footer>
+
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(React.createElement(App), document.getElementById("root"));
+  </script>
+</body>
+</html>
